@@ -1,80 +1,101 @@
 <html>
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-  .states {
-    fill: rgb(56, 105, 129);
-    stroke: #fff;
-  }
+  <!DOCTYPE html>
+  <meta charset="utf-8" />
+  <style>
+    .states {
+      fill: rgb(56, 105, 129);
+      stroke: #fff;
+    }
 
-  .symbol {
-    fill-opacity: .8;
-    stroke: #fff;
-  }
+    .symbol {
+      fill-opacity: 0.8;
+      stroke: #fff;
+    }
 
-  .states:hover {
-	fill-opacity: .7;
-}
-</style>
+    .states:hover {
+      fill-opacity: 0.7;
+    }
+  </style>
 
-<body>
-  <!-- d3 v6 integration -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <!-- d3 topojson -->
-  <script src="http://d3js.org/topojson.v1.min.js"></script>
-  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
-  <link href="style.css" rel="stylesheet">
-  <div id="layout">
-    <div id="title" class="frame">
-      <p>US COVID Map</p>
-    </div>
-    <div class="row">
-      <div id="visualization" class="frame">
-        <svg class="chart"></svg>
-        <script src="viz.js"></script>
+  <body>
+    <!-- d3 v6 integration -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- d3 topojson -->
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link
+      rel="stylesheet"
+      href="http://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css"
+    />
+    <link href="style.css" rel="stylesheet" />
+    <div id="layout">
+      <div id="title" class="frame">
+        <p>US COVID Map</p>
       </div>
-      <div id="filters" class="frame">
-        <label for="type">Type:</label>
-        <input type="text" id="mytype" readonly style="border:0; color:#f6931f; font-weight:bold;" value="All">
-        <br>
-        <select id='myselectform'>
-          <option value="all">All</option>
-          <option value="tech">Tech.</option>
-          <option value="transp">Transp.</option>
-          <option value="retail">Retail</option>
-          <option value="fastfood">Fastfood</option>
-          <option value="pharm">Pharm.</option>
-        </select>
-        <br/><br/>
-        <p>Volume</p>
-        <div id="vol" class="slider-range"></div>
-        <label for="volamount">Volume range:</label>
-        <input type="text" id="volamount" readonly style="border:0; color:#f6931f; font-weight:bold;">
-        <br/><br/>
-        <p>Delta</p>
-        <div id="delta" class="slider-range"></div>
-        <label for="deltaamount">Delta range:</label>
-        <input type="text" id="deltaamount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      <div class="row">
+        <div id="visualization" class="frame">
+          <svg class="chart"></svg>
+          <script src="viz.js"></script>
+        </div>
+        <div id="filters" class="frame">
+          <label for="type">Type:</label>
+          <input
+            type="text"
+            id="mytype"
+            readonly
+            style="border: 0; color: #f6931f; font-weight: bold"
+            value="All"
+          />
+          <br />
+          <select id="myselectform">
+            <option value="all">All</option>
+            <option value="tech">Tech.</option>
+            <option value="transp">Transp.</option>
+            <option value="retail">Retail</option>
+            <option value="fastfood">Fastfood</option>
+            <option value="pharm">Pharm.</option>
+          </select>
+          <br /><br />
+          <p>Volume</p>
+          <div id="vol" class="slider-range"></div>
+          <label for="volamount">Volume range:</label>
+          <input
+            type="text"
+            id="volamount"
+            readonly
+            style="border: 0; color: #f6931f; font-weight: bold"
+          />
+          <br /><br />
+          <p>Delta</p>
+          <div id="delta" class="slider-range"></div>
+          <label for="deltaamount">Delta range:</label>
+          <input
+            type="text"
+            id="deltaamount"
+            readonly
+            style="border: 0; color: #f6931f; font-weight: bold"
+          />
 
-        <script type="text/javascript">
-          document.getElementById("myselectform").onchange = function () {
-            $("#mytype").val(this.value);
-            filterData("type", this.value);
-          }
-        </script>
+          <script type="text/javascript">
+            document.getElementById("myselectform").onchange = function () {
+              $("#mytype").val(this.value);
+              filterData("type", this.value);
+            };
+          </script>
+        </div>
       </div>
     </div>
-  </div>
- 
 
-<FORM>
-  <INPUT TYPE="Button" value="Reset" onclick="resetMap()"/>
-  <INPUT TYPE="Button" value="Population to color" onclick="PopToColor()"/>
-  <INPUT TYPE="Button" value="Population to size" onclick="PopToSize()"/>
-  <INPUT TYPE="Button" value="Population to color and size" onclick="PopToCaSize()"/>
-</FORM>
-
-</body>
+    <form>
+      <input type="Button" value="Reset" onclick="resetMap()" />
+      <input type="Button" value="Population to color" onclick="PopToColor()" />
+      <input type="Button" value="Population to size" onclick="PopToSize()" />
+      <input
+        type="Button"
+        value="Population to color and size"
+        onclick="PopToCaSize()"
+      />
+    </form>
+  </body>
 </html>
