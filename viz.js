@@ -76,21 +76,19 @@ async function ready() {
 }
 
 $(function () {
-  $("#vol").slider({
+  $("#date").slider({
     range: false,
     min: 0,
     max: 1000,
     values: 0,
     slide: function (event, ui) {
       console.log(ui);
-      $("#volamount").val(ui.value);
+      $("#datetime").val(ui.value);
       vol_range = ui.value;
       //filterData("vol", ui.values);
     },
   });
-  $("#volamount").val(
-    $("#vol").slider("value") + " - " + $("#vol").slider("value")
-  );
+  $("#datetime").val($("#date").slider("value"));
 });
 
 function recolor(color) {
