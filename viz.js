@@ -14,11 +14,15 @@ ready();
 
 // keep these around for later
 let us, states, centroid;
+let cases;
 
 async function ready() {
   // load files async; store the values so we can use them later
   states = await d3.json("states.json");
   centroid = await d3.json("us-state-centroids.json");
+  cases = await d3.csv("covid_confirmed_usafacts_time_processed.csv");
+
+  console.log(cases[0]);
   // draw the states
   //   svg.append("path")
   //     .attr("class", "states")
