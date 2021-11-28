@@ -51,8 +51,7 @@
     //     .attr("class", "states")
     //     .datum(topojson.feature(states, states.objects.usStates))
     //     .attr("d", path).style("fill", function(d) {return "rgb(120,120,180)";});
-    console.log(a)
-    console.log(b)
+
     svg.selectAll(".state")
         .data(topojson.feature(states, states.objects.usStates).features)
         .enter().append("path")
