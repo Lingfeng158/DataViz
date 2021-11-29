@@ -245,17 +245,20 @@ viewData(min, max, min_d, max_d, cases[index], deaths[index]);
 function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
 type=$("#myselectform").val();
     // console.log(type);
-  var lowColor = '#f9f9f9';
-  var highColor = '#bc2a66';
+
   if (type == 'Case'){
       min = min_c;
       max = max_c;
       values = values_c;
+      var lowColor = '#f9f9f9';
+  var highColor = '#bc2a66';
   }
   else{
       min = min_d;
       max = max_d;
       values = values_d;
+      var lowColor = '#f9f9f9';
+  var highColor = '#3a0ca3';
   }
 
 var arrScale = d3.scaleSqrt()
