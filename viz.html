@@ -24,6 +24,10 @@
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <script src="https://unpkg.com/d3fc"></script>
+
+    <script src="detail.js"></script>
+
     <link
       rel="stylesheet"
       href="http://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css"
@@ -45,16 +49,12 @@
             id="mytype"
             readonly
             style="border: 0; color: #f6931f; font-weight: bold"
-            value="All"
+            value="Case"
           />
           <br />
           <select id="myselectform">
-            <option value="all">All</option>
-            <option value="tech">Tech.</option>
-            <option value="transp">Transp.</option>
-            <option value="retail">Retail</option>
-            <option value="fastfood">Fastfood</option>
-            <option value="pharm">Pharm.</option>
+            <option value="Case">Case</option>
+            <option value="Death">Death</option>
           </select>
           <br /><br />
           <p>Date</p>
@@ -67,22 +67,92 @@
             style="border: 0; color: #f6931f; font-weight: bold"
           />
           <br /><br />
-          <p>Delta</p>
-          <div id="delta" class="slider-range"></div>
-          <label for="deltaamount">Delta range:</label>
+          <label for="pane1">Raw Number:</label>
           <input
             type="text"
-            id="deltaamount"
+            id="mypane1"
             readonly
             style="border: 0; color: #f6931f; font-weight: bold"
+            value="Fully Vaccinated"
           />
+          <br />
+          <select id="myformforpane1">
+            <option value="PARTIALLY_OR_FULLY_VACCINATED_PERSONS">
+              Vaccinated
+            </option>
+            <option value="FULLY_VACCINATED_PERSONS" selected>
+              Fully Vaccinated
+            </option>
+          </select>
+          <br /><br />
+          <label for="pane2">Percentage:</label>
+          <input
+            type="text"
+            id="mypane2"
+            readonly
+            style="border: 0; color: #f6931f; font-weight: bold"
+            value="Fully Vaccinated"
+          />
+          <br />
+          <select id="myformforpane2">
+            <option value="PARTIALLY_OF_FULLY_VACCINATED_PERCENT">
+              Vaccinated
+            </option>
+            <option value="FULLY_VACCINATED_PERCENT" selected>
+              Fully Vaccinated
+            </option>
+          </select>
+          <br /><br />
+          <label for="pane3">Total Doses:</label>
+          <input
+            type="text"
+            id="mypane3"
+            readonly
+            style="border: 0; color: #f6931f; font-weight: bold"
+            value="Administered"
+          />
+          <br />
+          <select id="myformforpane3">
+            <option value="TOTAL_DOSES_ADMINISTERED" selected>
+              Administered
+            </option>
+            <option value="TOTAL_DOSES_DISTRIBUTED">Distributed</option>
+          </select>
+          <br /><br />
 
           <script type="text/javascript">
             document.getElementById("myselectform").onchange = function () {
-              $("#mytype").val(this.value);
-              filterData("type", this.value);
+              $("#mytype").val(this.options[this.selectedIndex].text);
+              viewData("type", this.value);
+            };
+            document.getElementById("myformforpane1").onchange = function () {
+              $("#mypane1").val(this.options[this.selectedIndex].text);
+              onFormChange();
+            };
+            document.getElementById("myformforpane2").onchange = function () {
+              $("#mypane2").val(this.options[this.selectedIndex].text);
+              onFormChange();
+            };
+            document.getElementById("myformforpane3").onchange = function () {
+              $("#mypane3").val(this.options[this.selectedIndex].text);
+              onFormChange();
             };
           </script>
+        </div>
+      </div>
+      <div id="title_detail" class="frame">Detailed Information For Ark</div>
+      <div class="row2">
+        <div id="v1" class="frame">
+          <div id="v1title">Raw Number of Fully Vaccinated Population</div>
+          <svg id="chart1"></svg>
+        </div>
+        <div id="v2" class="frame">
+          <div id="v2title">Percentage of Fully Vaccinated Population</div>
+          <svg id="chart2"></svg>
+        </div>
+        <div id="v3" class="frame">
+          <div id="v3title">Total Doses Administered</div>
+          <svg id="chart3"></svg>
         </div>
       </div>
     </div>

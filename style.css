@@ -22,7 +22,10 @@ p {
   display: flex;
 }
 
-#title,
+.row2 {
+  display: flex;
+}
+
 #filters {
   text-align: center;
 }
@@ -33,11 +36,37 @@ p {
   margin-bottom: -1px;
 }
 
+#title_detail {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: -1px;
+}
+
 #visualization {
   position: relative;
   width: 800px;
   text-align: center;
   border-right-width: 0;
+}
+
+#v1 {
+  position: relative;
+  width: 360px;
+  text-align: center;
+  border-right-width: 0;
+}
+
+#v2 {
+  position: relative;
+  width: 360px;
+  text-align: center;
+  border-right-width: 0;
+}
+
+#v3 {
+  position: relative;
+  width: 360px;
+  text-align: center;
 }
 
 #filters {
@@ -75,4 +104,10 @@ div.tooltip {
   background: lightsteelblue;
   border: 0px;
   pointer-events: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 2px;
 }
