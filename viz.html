@@ -45,16 +45,18 @@
             id="mytype"
             readonly
             style="border: 0; color: #f6931f; font-weight: bold"
-            value="All"
+            value="Case"
           />
           <br />
           <select id="myselectform">
-            <option value="all">All</option>
-            <option value="tech">Tech.</option>
-            <option value="transp">Transp.</option>
-            <option value="retail">Retail</option>
-            <option value="fastfood">Fastfood</option>
-            <option value="pharm">Pharm.</option>
+            <option value="Case">Case</option>
+            <option value="Death">Death</option>
+<!--            <option value="all">All</option>-->
+<!--            <option value="tech">Tech.</option>-->
+<!--            <option value="transp">Transp.</option>-->
+<!--            <option value="retail">Retail</option>-->
+<!--            <option value="fastfood">Fastfood</option>-->
+<!--            <option value="pharm">Pharm.</option>-->
           </select>
           <br /><br />
           <p>Date</p>
@@ -67,20 +69,20 @@
             style="border: 0; color: #f6931f; font-weight: bold"
           />
           <br /><br />
-          <p>Delta</p>
-          <div id="delta" class="slider-range"></div>
-          <label for="deltaamount">Delta range:</label>
-          <input
-            type="text"
-            id="deltaamount"
-            readonly
-            style="border: 0; color: #f6931f; font-weight: bold"
-          />
+<!--          <p>Delta</p>-->
+<!--          <div id="delta" class="slider-range"></div>-->
+<!--          <label for="deltaamount">Delta range:</label>-->
+<!--          <input-->
+<!--            type="text"-->
+<!--            id="deltaamount"-->
+<!--            readonly-->
+<!--            style="border: 0; color: #f6931f; font-weight: bold"-->
+<!--          />-->
 
           <script type="text/javascript">
             document.getElementById("myselectform").onchange = function () {
               $("#mytype").val(this.value);
-              filterData("type", this.value);
+              viewData("type", this.value);
             };
           </script>
         </div>
