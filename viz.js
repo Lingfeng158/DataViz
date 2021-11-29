@@ -308,7 +308,6 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
       // .enter()
       .append("path")
       .attr("class", "states")
-      .attr("d", path)
       .style("fill", function (d) {
         // Get data value
         //   console.log(d);
@@ -319,6 +318,18 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
         //     return '#f9f9f9';
         // }
         return arrScale_C(values_c[d.properties.STATE_ABBR]);
+      })
+      .attr(
+        "d",
+        path.pointRadius(function (d) {
+          return 10;
+        })
+      )
+      .on("mouseover", function (d) {
+        d3.select(this).attr("fill", "red");
+      })
+      .on("mouseout", function (d) {
+        d3.select(this).attr("fill", "green");
       });
   } else if (type == "Death") {
     var lowColor_D = "#f9f9f9";
@@ -335,7 +346,6 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
       // .enter()
       .append("path")
       .attr("class", "states")
-      .attr("d", path)
       .style("fill", function (d) {
         // Get data value
         //   console.log(d);
@@ -346,7 +356,36 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
         //     return '#f9f9f9';
         // }
         return arrScale_D(values_d[d.properties.STATE_ABBR]);
+      })
+      .attr(
+        "d",
+        path.pointRadius(function (d) {
+          return 10;
+        })
+      )
+      .on("mouseover", function (d) {
+        d3.select(this).attr("fill", "red");
+      })
+      .on("mouseout", function (d) {
+        d3.select(this).attr("fill", "green");
       });
+    // .on("mouseover", function (d, i) {
+    //   d3.select(this)
+    //     .transition()
+    //     .duration("50")
+    //     .attr("fill-opacity", ".01")
+    //     .append("svg:title")
+    //     .text(
+    //       function (d) {
+    //         return "\nPopulation ";
+    //       }
+
+    //       // .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
+    //     );
+    // })
+    // .on("mouseout", function (d, i) {
+    //   d3.select(this).transition().duration("50").attr("fill-opacity", "1");
+    // });
   }
 
   // var arrScale = d3.scaleSqrt()
