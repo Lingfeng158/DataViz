@@ -247,24 +247,11 @@ type=$("#myselectform").val();
     // console.log(type);
 
   if (type == 'Case'){
-      min = min_c;
-      max = max_c;
-      values = values_c;
-      var lowColor = '#f9f9f9';
-  var highColor = '#bc2a66';
-  }
-  else{
-      min = min_d;
-      max = max_d;
-      values = values_d;
-      var lowColor = '#f9f9f9';
-  var highColor = '#3a0ca3';
-  }
-
-var arrScale = d3.scaleSqrt()
-					.domain([min, max])
-					.range([lowColor, highColor]);
-
+      var lowColor_c = '#f9f9f9';
+  var highColor_c = '#bc2a66';
+  var arrScale_C = d3.scaleSqrt()
+					.domain([min_c, max_c])
+					.range([lowColor_c, highColor_c]);
   svg.selectAll(".state")
     .data(topojson.feature(states, states.objects.usStates).features)
     .enter()
@@ -276,12 +263,64 @@ var arrScale = d3.scaleSqrt()
 	// Get data value
     //   console.log(d);
     //   console.log(values);
-	var value = values[d.properties.STATE_ABBR];
+	// var value = values_c[d.properties.STATE_ABBR];
     // console.log(value);
     // if(d.properties.STATE_ABBR == 'AL'){
     //     return '#f9f9f9';
     // }
-	return arrScale(value);
+	return arrScale_C(values_c[d.properties.STATE_ABBR]);
 
 });
+  }
+  else if (type == 'Death'){
+
+      var lowColor_D = '#f9f9f9';
+  var highColor_D = '#3a0ca3';
+  var arrScale_D = d3.scaleSqrt()
+					.domain([min_d, max_d])
+					.range([lowColor_D, highColor_D]);
+  svg.selectAll(".state")
+    .data(topojson.feature(states, states.objects.usStates).features)
+    .enter()
+    // .data2(topojson.feature(states, states.objects.usStates).features)
+    // .enter()
+    .append("path")
+    .attr("class", "states")
+    .attr("d", path).style("fill", function(d) {
+	// Get data value
+    //   console.log(d);
+    //   console.log(values);
+	// var value = values_[d.properties.STATE_ABBR];
+    // console.log(value);
+    // if(d.properties.STATE_ABBR == 'AL'){
+    //     return '#f9f9f9';
+    // }
+	return arrScale_D(values_d[d.properties.STATE_ABBR]);
+
+});
+  }
+
+// var arrScale = d3.scaleSqrt()
+// 					.domain([min, max])
+// 					.range([lowColor, highColor]);
+
+//   svg.selectAll(".state")
+//     .data(topojson.feature(states, states.objects.usStates).features)
+//     .enter()
+//     // .data2(topojson.feature(states, states.objects.usStates).features)
+//     // .enter()
+//     .append("path")
+//     .attr("class", "states")
+//     .attr("d", path).style("fill", function(d) {
+// 	// Get data value
+//     //   console.log(d);
+//     //   console.log(values);
+// 	var value = values[d.properties.STATE_ABBR];
+//     console.log(value);
+//     // if(d.properties.STATE_ABBR == 'AL'){
+//     //     return '#f9f9f9';
+//     // }
+// 	return arrScale(value);
+//
+// });
 }
