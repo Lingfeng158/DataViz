@@ -2,7 +2,7 @@ let vax_full; //for full data
 let title1 = "FULLY_VACCINATED_PERSONS",
   title2 = "FULLY_VACCINATED_PERCENT",
   title3 = "TOTAL_DOSES_ADMINISTERED"; //for 3 detailed data
-let state_name = "Arkansas";
+let state_detail = "Arkansas";
 let partial_data = [];
 let margin_detail = { top: 20, right: 20, bottom: 30, left: 30 },
   width_detail = 360 - margin_detail.left - margin_detail.right,
@@ -21,7 +21,7 @@ function onFormChange() {
   document.getElementById("v3title").innerHTML =
     "Total Doses " + $("#mypane3").val();
   document.getElementById("title_detail").innerHTML =
-    "Detailed Information For " + state_name;
+    "Detailed Information For " + state_detail;
   init_detail();
 }
 
@@ -36,7 +36,7 @@ async function init_detail() {
 async function redraw_detail() {
   partial_data = [];
   vax_full.forEach((element) => {
-    if (element.GEOGRAPHY_NAME === state_name)
+    if (element.GEOGRAPHY_NAME === state_detail)
       partial_data.push([
         element.DATE,
         element[title1],
