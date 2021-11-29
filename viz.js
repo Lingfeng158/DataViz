@@ -292,7 +292,9 @@ async function ready() {
 function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
   type = $("#myselectform").val();
   // console.log(type);
-
+  let svg_g = svg
+      .selectAll(".state")
+      .data(topojson.feature(states, states.objects.usStates).features);
   if (type == "Case") {
     var lowColor_c = "#f9f9f9";
     var highColor_c = "#bc2a66";
@@ -300,9 +302,9 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
       .scaleSqrt()
       .domain([min_c, max_c])
       .range([lowColor_c, highColor_c]);
-    svg
-      .selectAll(".state")
-      .data(topojson.feature(states, states.objects.usStates).features)
+    svg_g
+      // .selectAll(".state")
+      // .data(topojson.feature(states, states.objects.usStates).features)
       .enter()
       // .data2(topojson.feature(states, states.objects.usStates).features)
       // .enter()
@@ -319,18 +321,18 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
         // }
         return arrScale_C(values_c[d.properties.STATE_ABBR]);
       })
-      .attr(
-        "d",
-        path.pointRadius(function (d) {
-          return 10;
-        })
-      )
-      .on("mouseover", function (d) {
-        d3.select(this).attr("fill", "red");
-      })
-      .on("mouseout", function (d) {
-        d3.select(this).attr("fill", "green");
-      });
+      .attr("d", path).on("mouseover", function (d, i) {
+						d3.select(this)
+							.attr("fill", "red")
+							.append("svg:title")
+              .text(function (d) { return d.properties.STATE_ABBR + '\nCases:' + values_c[d.properties.STATE_ABBR]; }
+
+							// .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
+							);
+					})
+					.on("mouseout", function (d, i) {
+						d3.select(this).attr("fill", "green");
+					});
   } else if (type == "Death") {
     var lowColor_D = "#f9f9f9";
     var highColor_D = "#3a0ca3";
@@ -357,18 +359,18 @@ function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
         // }
         return arrScale_D(values_d[d.properties.STATE_ABBR]);
       })
-      .attr(
-        "d",
-        path.pointRadius(function (d) {
-          return 10;
-        })
-      )
-      .on("mouseover", function (d) {
-        d3.select(this).attr("fill", "red");
-      })
-      .on("mouseout", function (d) {
-        d3.select(this).attr("fill", "green");
-      });
+      .attr("d", path).on("mouseover", function (d, i) {
+						d3.select(this)
+							.attr("fill", "red")
+							.append("svg:title")
+              .text(function (d) { return d.properties.STATE_ABBR + '\nDeath: '+ values_d[d.properties.STATE_ABBR]; }
+
+							// .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
+							);
+					})
+					.on("mouseout", function (d, i) {
+						d3.select(this).attr("fill", "green");
+					});
     // .on("mouseover", function (d, i) {
     //   d3.select(this)
     //     .transition()
