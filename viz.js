@@ -165,6 +165,8 @@ async function ready() {
   // });
 
   var index = 0;
+  values_c = cases[index];
+  values_d = deaths[index];
   $(function () {
     $("#date").slider({
       range: false,
