@@ -124,6 +124,7 @@
             document.getElementById("myselectform").onchange = function () {
               $("#mytype").val(this.options[this.selectedIndex].text);
               viewData("type", this.value);
+              // ready();
             };
             document.getElementById("myformforpane1").onchange = function () {
               $("#mypane1").val(this.options[this.selectedIndex].text);

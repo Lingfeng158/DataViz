@@ -114,8 +114,8 @@ async function ready() {
   // console.log(arr);
   //
   // console.log(values);
-  min = d3.min(arr);
-  max = d3.max(arr);
+  min_c = d3.min(arr);
+  max_c = d3.max(arr);
   console.log(d3.min(arr));
   console.log(d3.max(arr));
 
@@ -175,13 +175,17 @@ async function ready() {
       slide: function (event, ui) {
         // console.log(ui);
         var currentDate = new Date(cases[ui.value]["Date"]);
+        var formatTime = d3.timeFormat("%b %d, %Y");
+        var currentDate_1 = formatTime(new Date(cases[ui.value]["Date"]));
         index = ui.value;
         // console.log(currentDate);
         $("#now").text(currentDate.toDateString());
         $("#date_index").val(ui.value);
-        $("#datetime").val(currentDate);
+        $("#datetime").val(currentDate_1);
         // console.log(ui.value);
-        viewData(min, max, min_d, max_d, cases[index], deaths[index]);
+        values_c = cases[index];
+        values_d = deaths[index];
+        viewData();
       },
     });
     // $("#datetime").val($("#now").slider("value"));
@@ -286,10 +290,10 @@ async function ready() {
   //   .on("mouseout", function (d, i) {
   //     d3.select(this).attr("fill", "green");
   //   });
-  viewData(min, max, min_d, max_d, cases[index], deaths[index]);
+  viewData(cases[index], deaths[index]);
 }
 
-function viewData(min_c, max_c, min_d, max_d, values_c, values_d) {
+function viewData() {
   type = $("#myselectform").val();
   // console.log(type);
   let svg_g = svg
