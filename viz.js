@@ -25,80 +25,60 @@ async function ready() {
   deaths = await d3.csv("covid_deaths_usafacts_processed.csv");
   // deaths_T = await d3.csv("covid_deaths_usafacts_processed_T.csv");
 
-  state_name = [
-    "HI",
-    "AK",
-    "FL",
-    "SC",
-    "GA",
-    "AL",
-    "NC",
-    "TN",
-    "RI",
-    "CT",
-    "MA",
-    "ME",
-    "NH",
-    "VT",
-    "NY",
-    "NJ",
-    "PA",
-    "DE",
-    "MD",
-    "WV",
-    "KY",
-    "OH",
-    "MI",
-    "WY",
-    "MT",
-    "ID",
-    "WA",
-    "DC",
-    "TX",
-    "CA",
-    "AZ",
-    "NV",
-    "UT",
-    "CO",
-    "NM",
-    "OR",
-    "ND",
-    "SD",
-    "NE",
-    "IA",
-    "MS",
-    "IN",
-    "IL",
-    "MN",
-    "WI",
-    "MO",
-    "AR",
-    "OK",
-    "KS",
-    "LS",
-    "VA",
-  ];
-
-  console.log(cases[0]);
-
-  // draw the states
-  //   svg.append("path")
-  //     .attr("class", "states")
-  //     .datum(topojson.feature(states, states.objects.usStates))
-  //     .attr("d", path).style("fill", function(d) {return "rgb(120,120,180)";});
-
-  // const parseDate = d3.timeParse("%m\/%d\/%Y");
-  // const formatDate = d3.timeFormat("%B %d, %Y");
-  // // const parseTime = d3.timeParse("%m %d, %Y");
-  // a = parseDate(cases[0]['Date']);
-  // console.log(cases[0]['Date']);
-  // console.log(a);
-  // console.log(formatDate(a));
-  // max_Date = parseDate(cases[cases.length-1]['Date']);
-  // min_Date = parseDate(cases[0]['Date']);
-  // for(i = 0; i< cases.length; i++){
-  //
-  // }
+  state_name = {
+    HI: "Hawaii",
+    AK: "Alaska",
+    FL: "Florida",
+    SC: "South Carolina",
+    GA: "Georgia",
+    AL: "Alabama",
+    NC: "North Carolina",
+    TN: "Tennessee",
+    RI: "Rhode Island",
+    CT: "Connecticut",
+    MA: "Massachusetts",
+    ME: "Maine",
+    NH: "New Hampshire",
+    VT: "Vermont",
+    NY: "New York State",
+    NJ: "New Jersey",
+    PA: "Pennsylvania",
+    DE: "Delaware",
+    MD: "Maryland",
+    WV: "West Virginia",
+    KY: "Kentucky",
+    OH: "Ohio",
+    MI: "Michigan",
+    WY: "Wyoming",
+    MT: "Montana",
+    ID: "Idaho",
+    WA: "Washington",
+    DC: "District of Columbia",
+    TX: "Texas",
+    CA: "California",
+    AZ: "Arizona",
+    NV: "Nevada",
+    UT: "Utah",
+    CO: "Colorado",
+    NM: "New Mexico",
+    OR: "Oregon",
+    ND: "North Dakota",
+    SD: "South Dakota",
+    NE: "Nebraska",
+    IA: "Iowa",
+    MS: "Mississippi",
+    IN: "Indiana",
+    IL: "Illinois",
+    MN: "Minnesota",
+    WI: "Wisconsin",
+    MO: "Missouri",
+    AR: "Arkansas",
+    OK: "Oklahoma",
+    LA: "Louisiana",
+    KS: "Kansas",
+    LS: "Lesotho",
+    VA: "Virginia",
+  };
 
   var arr = [];
   for (i = 0; i < cases.length; i++) {
@@ -111,13 +91,9 @@ async function ready() {
       }
     }
   }
-  // console.log(arr);
-  //
-  // console.log(values);
+
   min_c = d3.min(arr);
   max_c = d3.max(arr);
-  console.log(d3.min(arr));
-  console.log(d3.max(arr));
 
   var arr_d = [];
   for (i = 0; i < deaths.length; i++) {
@@ -130,177 +106,46 @@ async function ready() {
       }
     }
   }
-  // console.log(arr);
-  //
-  // console.log(values);
+
   min_d = d3.min(arr_d);
   max_d = d3.max(arr_d);
-  console.log(d3.min(arr_d));
-  console.log(d3.max(arr_d));
-
-  // var time_scale = d3.scaleTime()
-  //     .domain([min_Date, max_Date])
-  //     .range([0, 100])
-  //     .clamp(true);
-
-  // $(function () {
-  //   $("#date").slider({
-  //     range: false,
-  //     min: min_Date.getTime(),
-  //     max: max_Date.getTime(),
-  //     step: 60 * 60 * 24 * 1000,
-  //     // values: 0,
-  //     slide: function (event, ui) {
-  //       console.log(ui);
-  //       var currentDate = new Date(ui.value);
-  //       console.log(currentDate);
-  //       $('#now').text(currentDate.toDateString());
-  //       $("#datetime").val(currentDate);
-  //       console.log(ui.value);
-  //       vol_range = ui.value;
-  //       //filterData("vol", ui.values);
-  //     },
-  //   });
-  //   // $("#datetime").val($("#date").slider("value"));
-  // });
 
   var index = 0;
   values_c = cases[index];
   values_d = deaths[index];
-  $(function () {
-    $("#date").slider({
-      range: false,
-      min: 0,
-      max: cases.length - 1,
-      step: 1,
-      // values: 0,
-      slide: function (event, ui) {
-        // console.log(ui);
-        var currentDate = new Date(cases[ui.value]["Date"]);
-        var formatTime = d3.timeFormat("%b %d, %Y");
-        var currentDate_1 = formatTime(new Date(cases[ui.value]["Date"]));
-        index = ui.value;
-        // console.log(currentDate);
-        $("#now").text(currentDate.toDateString());
-        $("#date_index").val(ui.value);
-        $("#datetime").val(currentDate_1);
-        // console.log(ui.value);
-        values_c = cases[index];
-        values_d = deaths[index];
-        viewData();
-      },
-    });
-    // $("#datetime").val($("#now").slider("value"));
+
+  $("#date").slider({
+    range: false,
+    min: 0,
+    max: cases.length - 1,
+    step: 1,
+    // values: 0,
+    slide: function (event, ui) {
+      // console.log(ui);
+      var currentDate = new Date(cases[ui.value]["Date"]);
+      var formatTime = d3.timeFormat("%b %d, %Y");
+      var currentDate_1 = formatTime(new Date(cases[ui.value]["Date"]));
+      index = ui.value;
+      // console.log(currentDate);
+      $("#now").text(currentDate.toDateString());
+      $("#date_index").val(ui.value);
+      $("#datetime").val(currentDate_1);
+      // console.log(ui.value);
+      values_c = cases[index];
+      values_d = deaths[index];
+      viewData();
+    },
   });
 
-  // var arr = [];
-  // for (var key in cases[index]) {
-  //     if (cases[index].hasOwnProperty(key)) {
-  //
-  //         if (key != "Date"){
-  //             console.log(key);
-  //         arr.push(cases[index][key]);}
-  //     }
-  // }
-  // console.log(arr);
-  //
-  // console.log(index);
-  //   var lowColor = '#f9f9f9'
-  //   var highColor = '#bc2a66'
-  //
-  // var arrScale = d3.scaleSqrt()
-  // 					.domain([d3.min(arr), d3.max(arr)])
-  // 					.range([lowColor, highColor]);
-  //
-  //   console.log(d3.min(arr));
-  //   console.log(d3.max(arr));
-  //
-  //   svg.selectAll(".state")
-  //     .data(topojson.feature(states, states.objects.usStates).features)
-  //     .enter()
-  //     // .data2(topojson.feature(states, states.objects.usStates).features)
-  //     // .enter()
-  //     .append("path")
-  //     .attr("class", "states")
-  //     .attr("d", path).style("fill", function(d) {
-  // 	// Get data value
-  // 	var value = cases[index][d.properties.STATE_ABBR];
-  //     console.log(value);
-  //     // if(d.properties.STATE_ABBR == 'AL'){
-  //     //     return '#f9f9f9';
-  //     // }
-  // 	return arrScale(value);
-  //
-  // })
-  //   ;
-
-  // let cases_date = cases[index].map(function (d) { return d });
-  // console.log(svg.selectAll(".state").data());
-  // var populationScale = d3.scaleSqrt()
-  // 					.domain([d3.min(population), d3.max(population)])
-  // 					.range(["green", "blue"]);
-  // svg.selectAll(".state").transition()
-  //         .attr("fill", function (d) { return populationScale(d.properties.population) });
-
-  //   svg.selectAll(".state").style("fill", function(d) {
-  //
-  // 	// Get data value
-  // 	var value = cases[index][d.id];
-  //     console.log(vale);
-  //
-  // 	return "rgb(213,222,217)";
-  // });
-
-  // .style("fill", function (d) {
-  //   return "rgb(120,120,180)";
-  // });
-
-  // draw the symbols on top
-  // svg
-  //   .selectAll(".symbol")
-  //   .data(
-  //     centroid.features.sort(function (a, b) {
-  //       return b.properties.population - a.properties.population;
-  //     })
-  //   )
-  //   .enter()
-  //   .append("path")
-  //   .attr("class", "symbol")
-  //   .attr("fill", "green")
-  //   .attr(
-  //     "d",
-  //     path.pointRadius(function (d) {
-  //       return 10;
-  //     })
-  //   )
-  //   .on("mouseover", function (d, i) {
-  //     d3.select(this)
-  //       .attr("fill", "red")
-  //       .append("svg:title")
-  //       .text(
-  //         function (d) {
-  //           return (
-  //             d3.select(this).data()[0].properties.name +
-  //             "\nPopulation " +
-  //             d3.select(this).data()[0].properties.population
-  //           );
-  //         }
-  //
-  //         // .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
-  //       );
-  //   })
-  //   .on("mouseout", function (d, i) {
-  //     d3.select(this).attr("fill", "green");
-  //   });
-  viewData(cases[index], deaths[index]);
+  viewData();
 }
 
 function viewData() {
   type = $("#myselectform").val();
   // console.log(type);
   let svg_g = svg
-      .selectAll(".state")
-      .data(topojson.feature(states, states.objects.usStates).features);
+    .selectAll(".state")
+    .data(topojson.feature(states, states.objects.usStates).features);
   if (type == "Case") {
     var lowColor_c = "#f9f9f9";
     var highColor_c = "#bc2a66";
@@ -309,36 +154,36 @@ function viewData() {
       .domain([min_c, max_c])
       .range([lowColor_c, highColor_c]);
     svg_g
-      // .selectAll(".state")
-      // .data(topojson.feature(states, states.objects.usStates).features)
+
       .enter()
-      // .data2(topojson.feature(states, states.objects.usStates).features)
-      // .enter()
+
       .append("path")
       .attr("class", "states")
+      .attr("id", function (d) {
+        return d.properties.STATE_ABBR;
+      })
       .style("fill", function (d) {
-        // Get data value
-        //   console.log(d);
-        //   console.log(values);
-        // var value = values_c[d.properties.STATE_ABBR];
-        // console.log(value);
-        // if(d.properties.STATE_ABBR == 'AL'){
-        //     return '#f9f9f9';
-        // }
         return arrScale_C(values_c[d.properties.STATE_ABBR]);
       })
-      .attr("d", path).on("mouseover", function (d, i) {
-						d3.select(this)
-							.attr("fill", "red")
-							.append("svg:title")
-              .text(function (d) { return d.properties.STATE_ABBR + '\nCases:' + values_c[d.properties.STATE_ABBR]; }
-
-							// .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
-							);
-					})
-					.on("mouseout", function (d, i) {
-						d3.select(this).attr("fill", "green");
-					});
+      .attr("d", path)
+      .on("mouseover", function (d, i) {
+        d3.select(this)
+          .append("svg:title")
+          .text(function (d) {
+            return (
+              d.properties.STATE_ABBR +
+              "\nCases:" +
+              values_c[d.properties.STATE_ABBR]
+            );
+          });
+      })
+      .on("mouseout", function (d, i) {
+        d3.select(this);
+      })
+      .on("click", function (d, i) {
+        state_detail = state_name[this.id];
+        onFormChange();
+      });
   } else if (type == "Death") {
     var lowColor_D = "#f9f9f9";
     var highColor_D = "#3a0ca3";
@@ -350,73 +195,33 @@ function viewData() {
       .selectAll(".state")
       .data(topojson.feature(states, states.objects.usStates).features)
       .enter()
-      // .data2(topojson.feature(states, states.objects.usStates).features)
-      // .enter()
+
       .append("path")
       .attr("class", "states")
+      .attr("id", function (d) {
+        return d.properties.STATE_ABBR;
+      })
       .style("fill", function (d) {
-        // Get data value
-        //   console.log(d);
-        //   console.log(values);
-        // var value = values_[d.properties.STATE_ABBR];
-        // console.log(value);
-        // if(d.properties.STATE_ABBR == 'AL'){
-        //     return '#f9f9f9';
-        // }
         return arrScale_D(values_d[d.properties.STATE_ABBR]);
       })
-      .attr("d", path).on("mouseover", function (d, i) {
-						d3.select(this)
-							.attr("fill", "red")
-							.append("svg:title")
-              .text(function (d) { return d.properties.STATE_ABBR + '\nDeath: '+ values_d[d.properties.STATE_ABBR]; }
-
-							// .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
-							);
-					})
-					.on("mouseout", function (d, i) {
-						d3.select(this).attr("fill", "green");
-					});
-    // .on("mouseover", function (d, i) {
-    //   d3.select(this)
-    //     .transition()
-    //     .duration("50")
-    //     .attr("fill-opacity", ".01")
-    //     .append("svg:title")
-    //     .text(
-    //       function (d) {
-    //         return "\nPopulation ";
-    //       }
-
-    //       // .text((d) => d.properties.name + '\nPopulation : ${d.properties.population}'
-    //     );
-    // })
-    // .on("mouseout", function (d, i) {
-    //   d3.select(this).transition().duration("50").attr("fill-opacity", "1");
-    // });
+      .attr("d", path)
+      .on("mouseover", function (d, i) {
+        d3.select(this)
+          .append("svg:title")
+          .text(function (d) {
+            return (
+              d.properties.STATE_ABBR +
+              "\nDeath: " +
+              values_d[d.properties.STATE_ABBR]
+            );
+          });
+      })
+      .on("mouseout", function (d, i) {
+        d3.select(this);
+      })
+      .on("click", function (d, i) {
+        state_detail = state_name[this.id];
+        onFormChange();
+      });
   }
-
-  // var arrScale = d3.scaleSqrt()
-  // 					.domain([min, max])
-  // 					.range([lowColor, highColor]);
-
-  //   svg.selectAll(".state")
-  //     .data(topojson.feature(states, states.objects.usStates).features)
-  //     .enter()
-  //     // .data2(topojson.feature(states, states.objects.usStates).features)
-  //     // .enter()
-  //     .append("path")
-  //     .attr("class", "states")
-  //     .attr("d", path).style("fill", function(d) {
-  // 	// Get data value
-  //     //   console.log(d);
-  //     //   console.log(values);
-  // 	var value = values[d.properties.STATE_ABBR];
-  //     console.log(value);
-  //     // if(d.properties.STATE_ABBR == 'AL'){
-  //     //     return '#f9f9f9';
-  //     // }
-  // 	return arrScale(value);
-  //
-  // });
 }

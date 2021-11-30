@@ -169,28 +169,19 @@ async function redraw_detail() {
     .append("g")
     .attr("transform", "translate(0," + height_detail + ")")
     .call(
-      fc
-        .axisLabelRotate(fc.axisBottom(x))
-        .ticks(d3.timeMonth, 1)
-        .tickFormat(d3.timeFormat("%b"))
+      d3.axisBottom(x).ticks(d3.timeMonth, 1).tickFormat(d3.timeFormat("%b"))
     );
   svg2
     .append("g")
     .attr("transform", "translate(0," + height_detail + ")")
     .call(
-      fc
-        .axisLabelRotate(fc.axisBottom(x))
-        .ticks(d3.timeMonth, 1)
-        .tickFormat(d3.timeFormat("%b"))
+      d3.axisBottom(x).ticks(d3.timeMonth, 1).tickFormat(d3.timeFormat("%b"))
     );
   svg3
     .append("g")
     .attr("transform", "translate(0," + height_detail + ")")
     .call(
-      fc
-        .axisLabelRotate(fc.axisBottom(x))
-        .ticks(d3.timeMonth, 1)
-        .tickFormat(d3.timeFormat("%b"))
+      d3.axisBottom(x).ticks(d3.timeMonth, 1).tickFormat(d3.timeFormat("%b"))
     );
 
   svg1

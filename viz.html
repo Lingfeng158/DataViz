@@ -43,7 +43,7 @@
           <script src="viz.js"></script>
         </div>
         <div id="filters" class="frame">
-          <label for="type">Type:</label>
+          <label for="type">Type :</label>
           <input
             type="text"
             id="mytype"
@@ -53,8 +53,8 @@
           />
           <br />
           <select id="myselectform">
-            <option value="Case">Case</option>
-            <option value="Death">Death</option>
+            <option value="Case">Covid Cases</option>
+            <option value="Death">Covid Deaths</option>
           </select>
           <br /><br />
           <p>Date</p>
@@ -65,8 +65,10 @@
             id="datetime"
             readonly
             style="border: 0; color: #f6931f; font-weight: bold"
+            value="Jan 22, 2020"
           />
           <br /><br />
+
           <label for="pane1">Raw Number:</label>
           <input
             type="text"
@@ -123,7 +125,7 @@
           <script type="text/javascript">
             document.getElementById("myselectform").onchange = function () {
               $("#mytype").val(this.options[this.selectedIndex].text);
-              viewData("type", this.value);
+              viewData();
               // ready();
             };
             document.getElementById("myformforpane1").onchange = function () {
@@ -141,7 +143,9 @@
           </script>
         </div>
       </div>
-      <div id="title_detail" class="frame">Detailed Information For Ark</div>
+      <div id="title_detail" class="frame">
+        Detailed Information For Arkansas
+      </div>
       <div class="row2">
         <div id="v1" class="frame">
           <div id="v1title">Raw Number of Fully Vaccinated Population</div>
