@@ -192,11 +192,13 @@ async function redraw_detail() {
     precise_data.push([
       cases[i]["Date"],
       parseInt(cases[i][state_ABBR]),
-      cases[i][state_ABBR] - cases[i - 1][state_ABBR],
+      Math.max(0, cases[i][state_ABBR] - cases[i - 1][state_ABBR]),
       parseInt(deaths[i][state_ABBR]),
-      deaths[i][state_ABBR] - deaths[i - 1][state_ABBR],
+      Math.max(0, deaths[i][state_ABBR] - deaths[i - 1][state_ABBR]),
     ]);
   }
+
+  //console.log(Math.max(0, -100));
 
   partial_data = [];
   vax_full.forEach((element) => {
