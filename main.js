@@ -1,5 +1,5 @@
 let title1 = "FULLY_VACCINATED_PERSONS",
-  title2 = "FULLY_VACCINATED_PERCENT",
+  title2 = "Cases",
   title3 = "TOTAL_DOSES_ADMINISTERED"; //for 3 detailed data
 let state_detail = "Arkansas";
 let state_ABBR = "AR";
@@ -15,9 +15,12 @@ let sensitive_word = "Fully Vaccinated"; // for detail pane 1
 let us,
   states,
   cases,
+  deaths,
   vax_full,
   arr = [],
   arr_d = [];
+
+const tickWidth = 60;
 
 function onFormChange() {
   title1 = $("#myformforpane1").val();
@@ -34,6 +37,8 @@ function onFormChange() {
       "Raw Number of " + sensitive_word + " Population";
   }
 
+  document.getElementById("v2title").innerHTML =
+    state_detail + " Covid " + title2;
   document.getElementById("v3title").innerHTML =
     "Total Doses " + $("#mypane3").val();
   document.getElementById("title_detail").innerHTML =
@@ -180,7 +185,19 @@ async function init() {
 }
 
 async function redraw_detail() {
+  //date, cum_case, delta_case, cum_death, delta_death
   precise_data = [];
+  let min_length = Math.min(cases.length, cases.length);
+  for (let i = 1; i < min_length; i++) {
+    precise_data.push([
+      cases[i]["Date"],
+      parseInt(cases[i][state_ABBR]),
+      cases[i][state_ABBR] - cases[i - 1][state_ABBR],
+      parseInt(deaths[i][state_ABBR]),
+      deaths[i][state_ABBR] - deaths[i - 1][state_ABBR],
+    ]);
+  }
+
   partial_data = [];
   vax_full.forEach((element) => {
     if (element.GEOGRAPHY_NAME === state_detail)
@@ -232,6 +249,7 @@ async function redraw_detail() {
 
   var x = d3.scaleTime().range([0, width_detail]);
   var y1 = d3.scaleLinear().range([height_detail, 0]);
+  var x2 = d3.scaleTime().range([0, width_detail]);
   var y2 = d3.scaleLinear().range([height_detail, 0]);
   var y3 = d3.scaleLinear().range([height_detail, 0]);
 
@@ -241,6 +259,15 @@ async function redraw_detail() {
     d.val1 = +d[1];
     d.val2 = +d[2];
     d.val3 = +d[3];
+  });
+
+  precise_data.forEach((d) => {
+    d.date = parseTime(d[0]);
+    d.cases = +d[1];
+    d.case_delta = +d[2];
+    d.deaths = +d[3];
+    d.death_delta = +d[4];
+    // console.log(d.date, d.cases);
   });
 
   x.domain(
@@ -254,10 +281,27 @@ async function redraw_detail() {
       return d.val1;
     }),
   ]);
+  x2.domain(
+    d3.extent(precise_data, function (d) {
+      return d.date;
+    })
+  );
   y2.domain([
     0,
-    d3.max(partial_data, function (d) {
-      return d.val2;
+    d3.max(precise_data, function (d) {
+      switch (title2) {
+        case "Cases":
+          return d.cases;
+          break;
+        case "Case Change":
+          return d.case_delta;
+          break;
+        case "Deaths":
+          return d.deaths;
+          break;
+        case "Death Change":
+          return d.death_delta;
+      }
     }),
   ]);
   y3.domain([
@@ -279,10 +323,22 @@ async function redraw_detail() {
   var valueline2 = d3
     .line()
     .x(function (d) {
-      return x(d.date);
+      return x2(d.date);
     })
     .y(function (d) {
-      return y2(d.val2);
+      switch (title2) {
+        case "Cases":
+          return y2(d.cases);
+          break;
+        case "Case Change":
+          return y2(d.case_delta);
+          break;
+        case "Deaths":
+          return y2(d.deaths);
+          break;
+        case "Death Change":
+          return y2(d.death_delta);
+      }
     });
   var valueline3 = d3
     .line()
@@ -301,7 +357,7 @@ async function redraw_detail() {
     .attr("d", valueline1);
   svg2
     .append("path")
-    .data([partial_data])
+    .data([precise_data])
     .attr("class", "line")
     .attr("fill", "none")
     .attr("d", valueline2);
@@ -317,19 +373,28 @@ async function redraw_detail() {
     .append("g")
     .attr("transform", "translate(0," + height_detail + ")")
     .call(
-      d3.axisBottom(x).ticks(d3.timeMonth, 1).tickFormat(d3.timeFormat("%b"))
+      d3
+        .axisBottom(x)
+        .ticks((1.2 * width_detail) / tickWidth)
+        .tickFormat(d3.timeFormat("%b%y"))
     );
   svg2
     .append("g")
     .attr("transform", "translate(0," + height_detail + ")")
     .call(
-      d3.axisBottom(x).ticks(d3.timeMonth, 1).tickFormat(d3.timeFormat("%b"))
+      d3
+        .axisBottom(x2)
+        .ticks(width_detail / tickWidth)
+        .tickFormat(d3.timeFormat("%b%y"))
     );
   svg3
     .append("g")
     .attr("transform", "translate(0," + height_detail + ")")
     .call(
-      d3.axisBottom(x).ticks(d3.timeMonth, 1).tickFormat(d3.timeFormat("%b"))
+      d3
+        .axisBottom(x)
+        .ticks((1.2 * width_detail) / tickWidth)
+        .tickFormat(d3.timeFormat("%b%y"))
     );
 
   if (sensitive_word.includes("%")) {
@@ -354,6 +419,29 @@ async function redraw_detail() {
       .style("text-anchor", "middle")
       .text("Count (100K)");
     svg1.append("g").call(d3.axisLeft(y1).tickFormat((d) => d / 100000));
+  }
+  if (title2 === "Cases") {
+    svg2
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin_detail.left)
+      .attr("x", 0 - height_detail / 2)
+      .attr("dy", "0.75em")
+      .attr("font-size", "12px")
+      .style("text-anchor", "middle")
+      .text("Count (10K)");
+    svg2.append("g").call(d3.axisLeft(y2).tickFormat((d) => d / 10000));
+  } else {
+    svg2
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin_detail.left)
+      .attr("x", 0 - height_detail / 2)
+      .attr("dy", "0.75em")
+      .attr("font-size", "12px")
+      .style("text-anchor", "middle")
+      .text("Count (1K)");
+    svg2.append("g").call(d3.axisLeft(y2).tickFormat((d) => d / 1000));
   }
 
   svg3
@@ -412,6 +500,7 @@ function viewMap() {
       })
       .on("click", function (d, i) {
         state_detail = state_name[this.id];
+        state_ABBR = this.id;
         onFormChange();
       });
   } else if (type == "Death") {
