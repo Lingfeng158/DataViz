@@ -16,7 +16,8 @@ let margin_ctrl = { top: 5, right: 15, bottom: 30, left: 15 },
 let detail_time_start = null,
   detail_time_end = null;
 
-let svg1, svg2, svg3;
+let svg1, svg2, svg3, svgLegend;
+let axisLeg;
 let sensitive_word = "Fully Vaccinated"; // for detail pane 1
 // keep these around for full data
 let us,
@@ -108,6 +109,61 @@ let state_name = {
   KS: "Kansas",
   LS: "Lesotho",
   VA: "Virginia",
+};
+
+let state_population = {
+  HI: 1415872,
+  AK: 731545,
+  FL: 21477737,
+  SC: 5148714,
+  GA: 10617423,
+  AL: 4903185,
+  NC: 10488084,
+  TN: 6829174,
+  RI: 1059361,
+  CT: 3565287,
+  MA: 6892503,
+  ME: 1344212,
+  NH: 1359711,
+  VT: 623989,
+  NY: 19453561,
+  NJ: 8882190,
+  PA: 12801989,
+  DE: 973764,
+  MD: 6045680,
+  WV: 1792147,
+  KY: 4467673,
+  OH: 11689100,
+  MI: 9986857,
+  WY: 578759,
+  MT: 1068778,
+  ID: 1787065,
+  WA: 7614893,
+  DC: 705749,
+  TX: 28995881,
+  CA: 39512223,
+  AZ: 7278717,
+  NV: 3080156,
+  UT: 3205958,
+  CO: 5758736,
+  NM: 2096829,
+  OR: 4217737,
+  ND: 762062,
+  SD: 884659,
+  NE: 1934408,
+  IA: 3155070,
+  MS: 2976149,
+  IN: 6732219,
+  IL: 12671821,
+  MN: 5639632,
+  WI: 5822434,
+  MO: 6137428,
+  AR: 3017804,
+  OK: 3956971,
+  LA: 4648794,
+  KS: 2913314,
+  LS: 2108328,
+  VA: 8535519,
 };
 
 let width = 960,
@@ -385,6 +441,9 @@ async function redraw_detail() {
       "translate(" + margin_detail.left + "," + margin_detail.top + ")"
     );
 
+  svgLegend = d3.select('#legend').append('svg')
+    .attr("width",700);
+
   var x = d3.scaleTime().range([0, width_detail]);
   var y1 = d3.scaleLinear().range([height_detail, 0]);
   var x2 = d3.scaleTime().range([0, width_detail]);
@@ -598,15 +657,21 @@ async function redraw_detail() {
 function viewMap() {
   type = $("#myselectform").val();
   // console.log(type);
-  let svg_g = svg
+
+let svg_g = svg
     .selectAll(".state")
     .data(topojson.feature(states, states.objects.usStates).features);
+
+
+
+
+
   if (type == "Case") {
     var lowColor_c = "#f9f9f9";
     var highColor_c = "#bc2a66";
     var arrScale_C = d3
       .scaleSqrt()
-      .domain([min_c, max_c])
+      .domain([min_c, 10000])
       .range([lowColor_c, highColor_c]);
     svg_g
 
@@ -618,7 +683,7 @@ function viewMap() {
         return d.properties.STATE_ABBR;
       })
       .style("fill", function (d) {
-        return arrScale_C(values_c[d.properties.STATE_ABBR]);
+        return arrScale_C(values_c[d.properties.STATE_ABBR]/state_population[d.properties.STATE_ABBR] * 10000);
       })
       .attr("d", path)
       .on("mouseover", function (d, i) {
@@ -627,6 +692,8 @@ function viewMap() {
           .text(function (d) {
             return (
               d.properties.STATE_ABBR +
+                  "\nCases per 10,000: " +
+                  values_c[d.properties.STATE_ABBR]/state_population[d.properties.STATE_ABBR] * 10000 +
               "\nCases:" +
               values_c[d.properties.STATE_ABBR]
             );
@@ -639,13 +706,84 @@ function viewMap() {
         state_detail = state_name[this.id];
         state_ABBR = this.id;
         onFormChange();
-      });
+      })
+    ;
+
+      var colorScale_le_c = d3.scaleLinear()
+  	.domain([min_c, 10000])
+  	.range([lowColor_c, highColor_c]);
+
+      svgLegend.select("defs").remove();
+  svgLegend.select("text").remove();
+  svgLegend.select("rect").remove();
+  svgLegend.select("g").remove();
+
+  // append a defs (for definition) element to your SVG
+  defs = svgLegend.append('defs');
+
+	// append a linearGradient element to the defs and give it a unique id
+  linearGradient = defs.append('linearGradient')
+		.attr('id', 'linear-gradient');
+
+  // horizontal gradient
+  linearGradient
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%");
+
+// append multiple color stops by using D3's data/enter step
+linearGradient.selectAll("stop")
+  .data([
+    {offset: "0%", color: lowColor_c},
+    {offset: "100%", color: highColor_c}
+  ])
+  .enter().append("stop")
+  .attr("offset", function(d) {
+    return d.offset;
+  })
+  .attr("stop-color", function(d) {
+    return d.color;
+  });
+
+//create tick marks
+xLeg = d3.scaleLinear()
+  .domain([min_c, 10000])
+  .range([10, 280]);
+
+axisLeg = d3.axisBottom(xLeg)
+  .tickValues(colorScale_le_c.domain())
+
+// append title
+svgLegend.append("text")
+  .attr("class", "legendTitle")
+  .attr("x", 0)
+  .attr("y", 20)
+  .style("text-anchor", "left")
+  .text("Cases");
+
+// draw the rectangle and fill with gradient
+svgLegend.append("rect")
+  .attr("x", 10)
+  .attr("y", 30)
+  .attr("width", 400)
+  .attr("height", 15)
+  .style("fill", "url(#linear-gradient)");
+
+
+
+svgLegend
+  .attr("class", "axis")
+  .append("g")
+  .attr("transform", "translate(0, 40)")
+  .call(axisLeg);
+
   } else if (type == "Death") {
     var lowColor_D = "#f9f9f9";
     var highColor_D = "#3a0ca3";
     var arrScale_D = d3
       .scaleSqrt()
-      .domain([min_d, max_d])
+      .domain([min_d, 10000])
       .range([lowColor_D, highColor_D]);
     svg
       .selectAll(".state")
@@ -658,7 +796,7 @@ function viewMap() {
         return d.properties.STATE_ABBR;
       })
       .style("fill", function (d) {
-        return arrScale_D(values_d[d.properties.STATE_ABBR]);
+        return arrScale_D(values_d[d.properties.STATE_ABBR]/state_population[d.properties.STATE_ABBR] * 10000);
       })
       .attr("d", path)
       .on("mouseover", function (d, i) {
@@ -667,6 +805,9 @@ function viewMap() {
           .text(function (d) {
             return (
               d.properties.STATE_ABBR +
+                  "\nDeath per 10,000: " +
+                  values_d[d.properties.STATE_ABBR]/state_population[d.properties.STATE_ABBR] * 10000 +
+
               "\nDeath: " +
               values_d[d.properties.STATE_ABBR]
             );
@@ -679,5 +820,75 @@ function viewMap() {
         state_detail = state_name[this.id];
         onFormChange();
       });
+
+
+     var colorScale_le_d = d3.scaleLinear()
+  	.domain([min_d, 10000])
+  	.range([lowColor_D, highColor_D]);
+
+      svgLegend.select("defs").remove();
+  svgLegend.select("text").remove();
+  svgLegend.select("rect").remove();
+  svgLegend.select("g").remove();
+
+  // append a defs (for definition) element to your SVG
+  defs = svgLegend.append('defs');
+
+	// append a linearGradient element to the defs and give it a unique id
+  linearGradient = defs.append('linearGradient')
+		.attr('id', 'linear-gradient');
+
+  // horizontal gradient
+  linearGradient
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%");
+
+// append multiple color stops by using D3's data/enter step
+linearGradient.selectAll("stop")
+  .data([
+    {offset: "0%", color: lowColor_D},
+    {offset: "100%", color: highColor_D}
+  ])
+  .enter().append("stop")
+  .attr("offset", function(d) {
+    return d.offset;
+  })
+  .attr("stop-color", function(d) {
+    return d.color;
+  });
+
+//create tick marks
+xLeg = d3.scaleLinear()
+  .domain([min_d, 10000])
+  .range([10, 280]);
+
+axisLeg = d3.axisBottom(xLeg)
+  .tickValues(colorScale_le_d.domain())
+
+// append title
+svgLegend.append("text")
+  .attr("class", "legendTitle")
+  .attr("x", 0)
+  .attr("y", 20)
+  .style("text-anchor", "left")
+  .text("Death");
+
+// draw the rectangle and fill with gradient
+svgLegend.append("rect")
+  .attr("x", 10)
+  .attr("y", 30)
+  .attr("width", 400)
+  .attr("height", 15)
+  .style("fill", "url(#linear-gradient)");
+
+
+
+svgLegend
+  .attr("class", "axis")
+  .append("g")
+  .attr("transform", "translate(0, 40)")
+  .call(axisLeg);
   }
 }
