@@ -26,7 +26,9 @@ let us,
   deaths,
   vax_full,
   arr = [],
-  arr_d = [];
+  arr_d = [],
+arr_dp = [],
+arrp = [];
 
 let x_ctrl;
 
@@ -217,6 +219,35 @@ async function init() {
 
   min_d = d3.min(arr_d);
   max_d = d3.max(arr_d);
+
+  for (i = 0; i < cases.length; i++) {
+    for (var key in cases[i]) {
+      if (cases[i].hasOwnProperty(key)) {
+        if (key != "Date") {
+          // console.log(key);
+          arrp.push(cases[i][key] / state_population[key] * 10000);
+        }
+      }
+    }
+  }
+
+  for (i = 0; i < deaths.length; i++) {
+    for (var key in deaths[i]) {
+      if (deaths[i].hasOwnProperty(key)) {
+        if (key != "Date") {
+          // console.log(key);
+          arr_dp.push(deaths[i][key] / state_population[key] * 10000);
+        }
+      }
+    }
+  }
+
+  min_cp = d3.min(arrp);
+  max_cp = d3.max(arrp);
+
+  min_dp = d3.min(arr_dp);
+  max_dp = d3.max(arr_dp);
+
 
   var index = 0;
   values_c = cases[index];
@@ -671,7 +702,120 @@ let svg_g = svg
     var highColor_c = "#bc2a66";
     var arrScale_C = d3
       .scaleSqrt()
-      .domain([min_c, 10000])
+      .domain([min_c, max_c])
+      .range([lowColor_c, highColor_c]);
+    svg_g
+
+      .enter()
+
+      .append("path")
+      .attr("class", "states")
+      .attr("id", function (d) {
+        return d.properties.STATE_ABBR;
+      })
+      .style("fill", function (d) {
+        return arrScale_C(values_c[d.properties.STATE_ABBR]);
+      })
+      .attr("d", path)
+      .on("mouseover", function (d, i) {
+        d3.select(this)
+          .append("svg:title")
+          .text(function (d) {
+            return (
+              d.properties.STATE_ABBR +
+                  "\nCases per 10,000: " +
+                  values_c[d.properties.STATE_ABBR]/state_population[d.properties.STATE_ABBR] * 10000 +
+              "\nCases:" +
+              values_c[d.properties.STATE_ABBR]
+            );
+          });
+      })
+      .on("mouseout", function (d, i) {
+        d3.select(this);
+      })
+      .on("click", function (d, i) {
+        state_detail = state_name[this.id];
+        state_ABBR = this.id;
+        onFormChange();
+      })
+    ;
+
+      var colorScale_le_c = d3.scaleLinear()
+  	.domain([min_c, max_c])
+  	.range([lowColor_c, highColor_c]);
+
+      svgLegend.select("defs").remove();
+  svgLegend.select("text").remove();
+  svgLegend.select("rect").remove();
+  svgLegend.select("g").remove();
+
+  // append a defs (for definition) element to your SVG
+  defs = svgLegend.append('defs');
+
+	// append a linearGradient element to the defs and give it a unique id
+  linearGradient = defs.append('linearGradient')
+		.attr('id', 'linear-gradient');
+
+  // horizontal gradient
+  linearGradient
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%");
+
+// append multiple color stops by using D3's data/enter step
+linearGradient.selectAll("stop")
+  .data([
+    {offset: "0%", color: lowColor_c},
+    {offset: "100%", color: highColor_c}
+  ])
+  .enter().append("stop")
+  .attr("offset", function(d) {
+    return d.offset;
+  })
+  .attr("stop-color", function(d) {
+    return d.color;
+  });
+
+//create tick marks
+xLeg = d3.scaleLinear()
+  .domain([min_c, max_c])
+  .range([10, 280]);
+
+axisLeg = d3.axisBottom(xLeg)
+  .tickValues(colorScale_le_c.domain())
+
+// append title
+svgLegend.append("text")
+  .attr("class", "legendTitle")
+  .attr("x", 0)
+  .attr("y", 20)
+  .style("text-anchor", "left")
+  .text("Cases");
+
+// draw the rectangle and fill with gradient
+svgLegend.append("rect")
+  .attr("x", 10)
+  .attr("y", 30)
+  .attr("width", 400)
+  .attr("height", 15)
+  .style("fill", "url(#linear-gradient)");
+
+
+
+svgLegend
+  .attr("class", "axis")
+  .append("g")
+  .attr("transform", "translate(0, 40)")
+  .call(axisLeg);
+
+  }
+  else if (type == "Cases per 10,000") {
+    var lowColor_c = "#f9f9f9";
+    var highColor_c = "#bc2a66";
+    var arrScale_C = d3
+      .scaleSqrt()
+      .domain([min_cp, max_cp])
       .range([lowColor_c, highColor_c]);
     svg_g
 
@@ -710,7 +854,7 @@ let svg_g = svg
     ;
 
       var colorScale_le_c = d3.scaleLinear()
-  	.domain([min_c, 10000])
+  	.domain([min_cp, max_cp])
   	.range([lowColor_c, highColor_c]);
 
       svgLegend.select("defs").remove();
@@ -748,7 +892,7 @@ linearGradient.selectAll("stop")
 
 //create tick marks
 xLeg = d3.scaleLinear()
-  .domain([min_c, 10000])
+  .domain([min_cp, max_cp])
   .range([10, 280]);
 
 axisLeg = d3.axisBottom(xLeg)
@@ -778,12 +922,126 @@ svgLegend
   .attr("transform", "translate(0, 40)")
   .call(axisLeg);
 
-  } else if (type == "Death") {
+  }
+  else if (type == "Death") {
     var lowColor_D = "#f9f9f9";
     var highColor_D = "#3a0ca3";
     var arrScale_D = d3
       .scaleSqrt()
-      .domain([min_d, 10000])
+      .domain([min_d, max_d])
+      .range([lowColor_D, highColor_D]);
+    svg
+      .selectAll(".state")
+      .data(topojson.feature(states, states.objects.usStates).features)
+      .enter()
+
+      .append("path")
+      .attr("class", "states")
+      .attr("id", function (d) {
+        return d.properties.STATE_ABBR;
+      })
+      .style("fill", function (d) {
+        return arrScale_D(values_d[d.properties.STATE_ABBR]);
+      })
+      .attr("d", path)
+      .on("mouseover", function (d, i) {
+        d3.select(this)
+          .append("svg:title")
+          .text(function (d) {
+            return (
+              d.properties.STATE_ABBR +
+                  "\nDeath per 10,000: " +
+                  values_d[d.properties.STATE_ABBR]/state_population[d.properties.STATE_ABBR] * 10000 +
+
+              "\nDeath: " +
+              values_d[d.properties.STATE_ABBR]
+            );
+          });
+      })
+      .on("mouseout", function (d, i) {
+        d3.select(this);
+      })
+      .on("click", function (d, i) {
+        state_detail = state_name[this.id];
+        onFormChange();
+      });
+
+
+     var colorScale_le_d = d3.scaleLinear()
+  	.domain([min_d, max_d])
+  	.range([lowColor_D, highColor_D]);
+
+      svgLegend.select("defs").remove();
+  svgLegend.select("text").remove();
+  svgLegend.select("rect").remove();
+  svgLegend.select("g").remove();
+
+  // append a defs (for definition) element to your SVG
+  defs = svgLegend.append('defs');
+
+	// append a linearGradient element to the defs and give it a unique id
+  linearGradient = defs.append('linearGradient')
+		.attr('id', 'linear-gradient');
+
+  // horizontal gradient
+  linearGradient
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%");
+
+// append multiple color stops by using D3's data/enter step
+linearGradient.selectAll("stop")
+  .data([
+    {offset: "0%", color: lowColor_D},
+    {offset: "100%", color: highColor_D}
+  ])
+  .enter().append("stop")
+  .attr("offset", function(d) {
+    return d.offset;
+  })
+  .attr("stop-color", function(d) {
+    return d.color;
+  });
+
+//create tick marks
+xLeg = d3.scaleLinear()
+  .domain([min_d, max_d])
+  .range([10, 280]);
+
+axisLeg = d3.axisBottom(xLeg)
+  .tickValues(colorScale_le_d.domain())
+
+// append title
+svgLegend.append("text")
+  .attr("class", "legendTitle")
+  .attr("x", 0)
+  .attr("y", 20)
+  .style("text-anchor", "left")
+  .text("Death");
+
+// draw the rectangle and fill with gradient
+svgLegend.append("rect")
+  .attr("x", 10)
+  .attr("y", 30)
+  .attr("width", 400)
+  .attr("height", 15)
+  .style("fill", "url(#linear-gradient)");
+
+
+
+svgLegend
+  .attr("class", "axis")
+  .append("g")
+  .attr("transform", "translate(0, 40)")
+  .call(axisLeg);
+  }
+  else if (type == "Death per 10,000") {
+    var lowColor_D = "#f9f9f9";
+    var highColor_D = "#3a0ca3";
+    var arrScale_D = d3
+      .scaleSqrt()
+      .domain([min_dp, max_dp])
       .range([lowColor_D, highColor_D]);
     svg
       .selectAll(".state")
@@ -823,7 +1081,7 @@ svgLegend
 
 
      var colorScale_le_d = d3.scaleLinear()
-  	.domain([min_d, 10000])
+  	.domain([min_dp, max_dp])
   	.range([lowColor_D, highColor_D]);
 
       svgLegend.select("defs").remove();
@@ -861,7 +1119,7 @@ linearGradient.selectAll("stop")
 
 //create tick marks
 xLeg = d3.scaleLinear()
-  .domain([min_d, 10000])
+  .domain([min_dp, max_dp])
   .range([10, 280]);
 
 axisLeg = d3.axisBottom(xLeg)
@@ -891,4 +1149,5 @@ svgLegend
   .attr("transform", "translate(0, 40)")
   .call(axisLeg);
   }
+
 }
