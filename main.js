@@ -9,6 +9,13 @@ let margin_detail = { top: 20, right: 20, bottom: 30, left: 30 },
   width_detail = 360 - margin_detail.left - margin_detail.right,
   height_detail = 300 - margin_detail.top - margin_detail.bottom;
 
+let margin_ctrl = { top: 5, right: 15, bottom: 30, left: 15 },
+  width_ctrl = 370 - margin_ctrl.left - margin_ctrl.right,
+  height_ctrl = 60 - margin_ctrl.top - margin_ctrl.bottom;
+
+let detail_time_start = null,
+  detail_time_end = null;
+
 let svg1, svg2, svg3;
 let sensitive_word = "Fully Vaccinated"; // for detail pane 1
 // keep these around for full data
@@ -20,8 +27,10 @@ let us,
   arr = [],
   arr_d = [];
 
-const tickWidth = 60;
+let x_ctrl;
 
+const tickWidth = 60;
+let parseTime = d3.timeParse("%m/%d/%Y");
 function onFormChange() {
   title1 = $("#myformforpane1").val();
   title2 = $("#myformforpane2").val();
@@ -180,6 +189,96 @@ async function init() {
     },
   });
 
+  let date_range = [];
+  vax_full.forEach((element) => {
+    if (element.GEOGRAPHY_NAME === state_detail) {
+      date_range.push([element.DATE]);
+    }
+  });
+  date_range.forEach(function (d) {
+    d.date = parseTime(d[0]);
+  });
+
+  x_ctrl = d3.scaleTime().range([0, width_ctrl]);
+  x_ctrl.domain(
+    d3.extent(date_range, function (d) {
+      return d.date;
+    })
+  );
+
+  var svg_ctrl = d3
+    .select("#ctrlsvg")
+    .attr("width", width_ctrl + margin_ctrl.left + margin_ctrl.right)
+    .attr("height", height_ctrl + margin_ctrl.top + margin_ctrl.bottom)
+    .append("g")
+    .attr(
+      "transform",
+      "translate(" + margin_ctrl.left + "," + margin_ctrl.top + ")"
+    );
+
+  svg_ctrl
+    .append("g")
+    .attr("class", "axis axis--grid")
+    .attr("transform", "translate(0," + height_ctrl + ")")
+    .call(
+      d3
+        .axisBottom(x_ctrl)
+        .ticks(6)
+        .tickSize(-height_ctrl)
+        .tickFormat(function () {
+          return null;
+        })
+    );
+
+  svg_ctrl
+    .append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + height_ctrl + ")")
+    .call(
+      d3.axisBottom(x_ctrl).ticks(6).tickFormat(d3.timeFormat("%b"))
+      // .tickPadding(0)
+    )
+    .attr("text-anchor", null)
+    .selectAll("text")
+    .attr("x", 0);
+
+  let brush = d3
+    .brushX()
+    .extent([
+      [0, 0],
+      [width_ctrl, height_ctrl],
+    ])
+    .on("end", brushended);
+  // brush.extent([new Date(2021, 1, 10), new Date(2021, 11, 14) - 1]);
+
+  svg_ctrl
+    .append("g")
+    .attr("class", "brush")
+    .call(brush)
+    .on("dblclick", dblclicked);
+
+  function dblclicked() {
+    const selection = d3.brushSelection(this) ? null : x_ctrl.range();
+    d3.select(this).call(brush.move, selection);
+  }
+
+  function brushended({ selection }) {
+    if (selection) {
+      detail_time_start = x_ctrl.invert(selection[0]);
+      detail_time_end = x_ctrl.invert(selection[1]);
+      $("#mypane4").val(
+        d3.timeFormat("%b %d")(detail_time_start) +
+          " - " +
+          d3.timeFormat("%b %d")(detail_time_end)
+      );
+    } else {
+      detail_time_start = null;
+      detail_time_end = null;
+      $("#mypane4").val("Full Range");
+    }
+    redraw_detail();
+  }
+
   redraw_detail();
   viewMap();
 }
@@ -188,29 +287,66 @@ async function redraw_detail() {
   //date, cum_case, delta_case, cum_death, delta_death
   precise_data = [];
   let min_length = Math.min(cases.length, cases.length);
-  for (let i = 1; i < min_length; i++) {
-    precise_data.push([
-      cases[i]["Date"],
-      parseInt(cases[i][state_ABBR]),
-      Math.max(0, cases[i][state_ABBR] - cases[i - 1][state_ABBR]),
-      parseInt(deaths[i][state_ABBR]),
-      Math.max(0, deaths[i][state_ABBR] - deaths[i - 1][state_ABBR]),
-    ]);
-  }
 
   //console.log(Math.max(0, -100));
 
   partial_data = [];
-  vax_full.forEach((element) => {
-    if (element.GEOGRAPHY_NAME === state_detail)
-      partial_data.push([
-        element.DATE,
-        element[title1],
-        element[title2],
-        element[title3],
+  if (detail_time_end && detail_time_start) {
+    for (let i = 1; i < min_length; i++) {
+      if (
+        parseTime(cases[i]["Date"]) >= detail_time_start &&
+        parseTime(cases[i]["Date"]) <= detail_time_end
+      ) {
+        precise_data.push([
+          cases[i]["Date"],
+          parseInt(cases[i][state_ABBR]),
+          Math.max(0, cases[i][state_ABBR] - cases[i - 1][state_ABBR]),
+          parseInt(deaths[i][state_ABBR]),
+          Math.max(0, deaths[i][state_ABBR] - deaths[i - 1][state_ABBR]),
+        ]);
+      }
+    }
+
+    vax_full.forEach((element) => {
+      if (
+        element.GEOGRAPHY_NAME === state_detail &&
+        parseTime(element.DATE) >= detail_time_start &&
+        parseTime(element.DATE) <= detail_time_end
+      ) {
+        partial_data.push([
+          element.DATE,
+          element[title1],
+          element[title2],
+          element[title3],
+        ]);
+      }
+
+      //partial_data.push(element);
+    });
+  } else {
+    for (let i = 1; i < min_length; i++) {
+      precise_data.push([
+        cases[i]["Date"],
+        parseInt(cases[i][state_ABBR]),
+        Math.max(0, cases[i][state_ABBR] - cases[i - 1][state_ABBR]),
+        parseInt(deaths[i][state_ABBR]),
+        Math.max(0, deaths[i][state_ABBR] - deaths[i - 1][state_ABBR]),
       ]);
-    //partial_data.push(element);
-  });
+    }
+
+    vax_full.forEach((element) => {
+      if (element.GEOGRAPHY_NAME === state_detail) {
+        partial_data.push([
+          element.DATE,
+          element[title1],
+          element[title2],
+          element[title3],
+        ]);
+      }
+
+      //partial_data.push(element);
+    });
+  }
 
   partial_data.sort((a, b) => {
     return Date.parse(a[0]) - Date.parse(b[0]);
@@ -255,7 +391,6 @@ async function redraw_detail() {
   var y2 = d3.scaleLinear().range([height_detail, 0]);
   var y3 = d3.scaleLinear().range([height_detail, 0]);
 
-  var parseTime = d3.timeParse("%m/%d/%Y");
   partial_data.forEach(function (d) {
     d.date = parseTime(d[0]);
     d.val1 = +d[1];

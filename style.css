@@ -15,7 +15,7 @@ p {
 }
 
 #layout {
-  width: 1080px;
+  width: 1200px;
 }
 
 .row {
@@ -48,31 +48,35 @@ p {
   text-align: center;
   border-right-width: 0;
 }
+.chart {
+  z-index: 1;
+}
 
 #v1 {
   position: relative;
-  width: 360px;
+  width: 400px;
   text-align: center;
   border-right-width: 0;
 }
 
 #v2 {
   position: relative;
-  width: 360px;
+  width: 400px;
   text-align: center;
   border-right-width: 0;
 }
 
 #v3 {
   position: relative;
-  width: 360px;
+  width: 400px;
   text-align: center;
 }
 
 #filters {
-  width: 280px;
+  width: 400px;
   padding-left: 1rem;
   padding-right: 1rem;
+  z-index: 3;
 }
 .slider {
   margin-bottom: 0.5rem;
@@ -110,4 +114,18 @@ div.tooltip {
   fill: none;
   stroke: steelblue;
   stroke-width: 2px;
+}
+
+.axis--grid .domain {
+  fill: #ddd;
+  stroke: none;
+}
+
+.axis--x .domain,
+.axis--grid .tick line {
+  stroke: #fff;
+}
+
+.axis--grid .tick--minor line {
+  stroke-opacity: 0.5;
 }
