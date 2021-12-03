@@ -386,8 +386,14 @@ async function redraw_detail() {
         precise_data.push([
           cases[i]["Date"],
           parseInt(cases[i][state_ABBR]),
+          parseFloat(
+            (cases[i][state_ABBR] / state_population[state_ABBR]) * 1000
+          ),
           Math.max(0, cases[i][state_ABBR] - cases[i - 1][state_ABBR]),
           parseInt(deaths[i][state_ABBR]),
+          parseFloat(
+            (deaths[i][state_ABBR] / state_population[state_ABBR]) * 1000
+          ),
           Math.max(0, deaths[i][state_ABBR] - deaths[i - 1][state_ABBR]),
         ]);
       }
@@ -414,8 +420,14 @@ async function redraw_detail() {
       precise_data.push([
         cases[i]["Date"],
         parseInt(cases[i][state_ABBR]),
+        parseFloat(
+          (cases[i][state_ABBR] / state_population[state_ABBR]) * 1000
+        ),
         Math.max(0, cases[i][state_ABBR] - cases[i - 1][state_ABBR]),
         parseInt(deaths[i][state_ABBR]),
+        parseFloat(
+          (deaths[i][state_ABBR] / state_population[state_ABBR]) * 1000
+        ),
         Math.max(0, deaths[i][state_ABBR] - deaths[i - 1][state_ABBR]),
       ]);
     }
@@ -487,9 +499,11 @@ async function redraw_detail() {
   precise_data.forEach((d) => {
     d.date = parseTime(d[0]);
     d.cases = +d[1];
-    d.case_delta = +d[2];
-    d.deaths = +d[3];
-    d.death_delta = +d[4];
+    d.casesP = +d[2];
+    d.case_delta = +d[3];
+    d.deaths = +d[4];
+    d.deathsP = +d[5];
+    d.death_delta = +d[6];
     // console.log(d.date, d.cases);
   });
 
@@ -516,11 +530,17 @@ async function redraw_detail() {
         case "Cases":
           return d.cases;
           break;
+        case "Cases Per 1K":
+          return d.casesP;
+          break;
         case "Case Change":
           return d.case_delta;
           break;
         case "Deaths":
           return d.deaths;
+          break;
+        case "Deaths Per 1K":
+          return d.deathsP;
           break;
         case "Death Change":
           return d.death_delta;
@@ -553,11 +573,17 @@ async function redraw_detail() {
         case "Cases":
           return y2(d.cases);
           break;
+        case "Cases Per 1K":
+          return y2(d.casesP);
+          break;
         case "Case Change":
           return y2(d.case_delta);
           break;
         case "Deaths":
           return y2(d.deaths);
+          break;
+        case "Deaths Per 1K":
+          return y2(d.deathsP);
           break;
         case "Death Change":
           return y2(d.death_delta);
@@ -654,6 +680,17 @@ async function redraw_detail() {
       .style("text-anchor", "middle")
       .text("Count (10K)");
     svg2.append("g").call(d3.axisLeft(y2).tickFormat((d) => d / 10000));
+  } else if (title2.includes("Per")) {
+    svg2
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin_detail.left)
+      .attr("x", 0 - height_detail / 2)
+      .attr("dy", "0.75em")
+      .attr("font-size", "12px")
+      .style("text-anchor", "middle")
+      .text("Count");
+    svg2.append("g").call(d3.axisLeft(y2));
   } else {
     svg2
       .append("text")
