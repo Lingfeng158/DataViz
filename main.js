@@ -59,7 +59,7 @@ function onFormChange() {
   redraw_detail();
 }
 
- //State names
+//State names
 let state_name = {
   HI: "Hawaii",
   AK: "Alaska",
@@ -257,7 +257,6 @@ async function init() {
   values_c = cases[index];
   values_d = deaths[index];
 
-
   // The sliders for selecting Date
   $("#date").slider({
     range: false,
@@ -302,6 +301,7 @@ async function init() {
     })
   );
 
+  //svg for time axis control
   var svg_ctrl = d3
     .select("#ctrlsvg")
     .attr("width", width_ctrl + margin_ctrl.left + margin_ctrl.right)
@@ -379,14 +379,17 @@ async function init() {
   viewMap();
 }
 
+//function for redrawing temporal information for specific state
 async function redraw_detail() {
+  //data for state case/death info depending on selection
   //date, cum_case, delta_case, cum_death, delta_death
   precise_data = [];
   let min_length = Math.min(cases.length, cases.length);
 
   //console.log(Math.max(0, -100));
-
+  //data for vaccine info
   partial_data = [];
+  //case when time axis control is defined
   if (detail_time_end && detail_time_start) {
     for (let i = 1; i < min_length; i++) {
       if (
@@ -408,7 +411,7 @@ async function redraw_detail() {
         ]);
       }
     }
-
+    //formatting for D3
     vax_full.forEach((element) => {
       if (
         element.GEOGRAPHY_NAME === state_detail &&
@@ -426,6 +429,8 @@ async function redraw_detail() {
       //partial_data.push(element);
     });
   } else {
+    //case for when control axis is not defined.
+
     for (let i = 1; i < min_length; i++) {
       precise_data.push([
         cases[i]["Date"],
@@ -459,9 +464,12 @@ async function redraw_detail() {
   partial_data.sort((a, b) => {
     return Date.parse(a[0]) - Date.parse(b[0]);
   });
+  //remove old element for refreshing
   d3.select("#c1Ele").remove();
   d3.select("#c2Ele").remove();
   d3.select("#c3Ele").remove();
+
+  //creating 3 svgs
   svg1 = d3
     .select("#chart1")
     .attr("width", width_detail + margin_detail.left + margin_detail.right)
@@ -493,8 +501,10 @@ async function redraw_detail() {
       "translate(" + margin_detail.left + "," + margin_detail.top + ")"
     );
 
+  //define domain and scale for pane 1,2,3
   var x = d3.scaleTime().range([0, width_detail]);
   var y1 = d3.scaleLinear().range([height_detail, 0]);
+  //x2 is the same for pane 2 and 3
   var x2 = d3.scaleTime().range([0, width_detail]);
   var y2 = d3.scaleLinear().range([height_detail, 0]);
   var y3 = d3.scaleLinear().range([height_detail, 0]);
@@ -564,7 +574,7 @@ async function redraw_detail() {
     }),
   ]);
 
-  // define the line
+  // define the line for pane 1,2,3
   var valueline1 = d3
     .line()
     .x(function (d) {
@@ -608,6 +618,7 @@ async function redraw_detail() {
       return y3(d.val3);
     });
 
+  //main graph generation
   svg1
     .append("path")
     .data([partial_data])
@@ -656,6 +667,7 @@ async function redraw_detail() {
         .tickFormat(d3.timeFormat("%b%y"))
     );
 
+  //depending on selection, change y axis scale and name
   if (sensitive_word.includes("%")) {
     svg1
       .append("text")
@@ -679,6 +691,8 @@ async function redraw_detail() {
       .text("Count (100K)");
     svg1.append("g").call(d3.axisLeft(y1).tickFormat((d) => d / 100000));
   }
+
+  //depending on selection, change y axis scale and name
   if (title2 === "Cases") {
     svg2
       .append("text")
