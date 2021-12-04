@@ -734,6 +734,7 @@ function viewMap() {
   type = $("#myselectform").val();
   // console.log(type);
 
+  // Michelle Chandra’s interactive US Map http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
   let svg_g = svg
     .selectAll(".state")
     .data(topojson.feature(states, states.objects.usStates).features);
