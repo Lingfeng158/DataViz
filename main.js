@@ -35,6 +35,7 @@ let x_ctrl;
 const tickWidth = 60;
 let parseTime = d3.timeParse("%m/%d/%Y");
 function onFormChange() {
+  // Temporal plots initialization
   title1 = $("#myformforpane1").val();
   title2 = $("#myformforpane2").val();
   title3 = $("#myformforpane3").val();
@@ -58,6 +59,7 @@ function onFormChange() {
   redraw_detail();
 }
 
+ //State names
 let state_name = {
   HI: "Hawaii",
   AK: "Alaska",
@@ -113,6 +115,7 @@ let state_name = {
   VA: "Virginia",
 };
 
+// State population
 let state_population = {
   HI: 1415872,
   AK: 731545,
@@ -179,19 +182,19 @@ let path = d3.geoPath().projection(projection);
 
 let svg = d3.select(".chart").attr("width", width).attr("height", height);
 
-// call the function that draws
+// call the initialization function at first
 init();
 
 async function init() {
-  // load files async; store the values so we can use them later
+  // Initialization function: initial Spatial and Temporal visualization
+
+  // load files async: state information, preprocessed cases, death and vaccination information; store the values so we can use them later
   states = await d3.json("states.json");
-  // centroid = await d3.json("us-state-centroids.json");
   cases = await d3.csv("covid_confirmed_usafacts_time_processed.csv");
-  // cases_T = await d3.csv("covid_confirmed_usafacts_time_processed_T.csv");
   deaths = await d3.csv("covid_deaths_usafacts_processed.csv");
-  // deaths_T = await d3.csv("covid_deaths_usafacts_processed_T.csv");
   vax_full = await d3.csv("./covid_vax.csv");
 
+  //Get the min and max of cases/death for each states
   for (i = 0; i < cases.length; i++) {
     for (var key in cases[i]) {
       if (cases[i].hasOwnProperty(key)) {
@@ -220,6 +223,7 @@ async function init() {
   min_d = Math.min(...arr_d);
   max_d = Math.max(...arr_d);
 
+  //Get the min and max of cases/death per 1,000 people for each states
   for (i = 0; i < cases.length; i++) {
     for (var key in cases[i]) {
       if (cases[i].hasOwnProperty(key)) {
@@ -248,10 +252,13 @@ async function init() {
   min_dp = d3.min(arr_dp);
   max_dp = d3.max(arr_dp);
 
+  // Get the cases/death data for the current selected Date
   var index = 0;
   values_c = cases[index];
   values_d = deaths[index];
 
+
+  // The sliders for selecting Date
   $("#date").slider({
     range: false,
     min: 0,
@@ -260,6 +267,7 @@ async function init() {
     // values: 0,
     slide: function (event, ui) {
       // console.log(ui);
+      // Get the current Date and Change the Date format
       var currentDate = new Date(cases[ui.value]["Date"]);
       var formatTime = d3.timeFormat("%b %d, %Y");
       var currentDate_1 = formatTime(new Date(cases[ui.value]["Date"]));
@@ -269,8 +277,10 @@ async function init() {
       $("#date_index").val(ui.value);
       $("#datetime").val(currentDate_1);
       // console.log(ui.value);
+      // Get the cases/death data for the selected Date
       values_c = cases[index];
       values_d = deaths[index];
+      // Show the Spatial vis
       viewMap();
     },
   });
@@ -719,6 +729,8 @@ async function redraw_detail() {
 }
 
 function viewMap() {
+  // Visualize the Spatial information
+  // the color legend code is largely borrowed from Andrew Reid's post at https://stackoverflow.com/questions/49739119/legend-with-smooth-gradient-and-corresponding-labels
   type = $("#myselectform").val();
   // console.log(type);
 
@@ -727,26 +739,29 @@ function viewMap() {
     .data(topojson.feature(states, states.objects.usStates).features);
 
   if (type == "Case") {
+    // If selected "Case"
+    //low and high color
     var lowColor_c = "#f9f9f9";
     var highColor_c = "#bc2a66";
-    var arrScale_C = d3
+    var arr_Scale_C = d3
       .scaleLinear()
       .domain([min_c, max_c])
       .range([lowColor_c, highColor_c]);
+
+    // Show the Spatial visualization
     svg_g
-
       .enter()
-
       .append("path")
       .attr("class", "states")
       .attr("id", function (d) {
         return d.properties.STATE_ABBR;
       })
       .style("fill", function (d) {
-        return arrScale_C(values_c[d.properties.STATE_ABBR]);
+        return arr_Scale_C(values_c[d.properties.STATE_ABBR]);
       })
       .attr("d", path)
       .on("mouseover", function (d, i) {
+        // show the information when clicking
         d3.select(this)
           .append("svg:title")
           .text(function (d) {
@@ -767,38 +782,29 @@ function viewMap() {
         d3.select(this);
       })
       .on("click", function (d, i) {
+        // Change the Temporal plots when clicking
         state_detail = state_name[this.id];
         state_ABBR = this.id;
         onFormChange();
       });
 
-    var colorScale_le_c = d3
-      .scaleLinear()
-      .domain([min_c, max_c])
-      .range([lowColor_c, highColor_c]);
+    // Update the legend
     d3.select("#legend").select("svg").remove();
     svgLegend = d3.select("#legend").append("svg").attr("width", 400);
-    // svgLegend.select("defs").remove();
-    // svgLegend.select("text").remove();
-    // svgLegend.select("rect").remove();
-    // svgLegend.select("g").remove();
 
-    // append a defs (for definition) element to your SVG
+    // linearGradient to defs, each has a unique id
     defs = svgLegend.append("defs");
-
-    // append a linearGradient element to the defs and give it a unique id
     linearGradient = defs
       .append("linearGradient")
       .attr("id", "linear-gradient");
 
-    // horizontal gradient
     linearGradient
       .attr("x1", "0%")
       .attr("y1", "0%")
       .attr("x2", "100%")
       .attr("y2", "0%");
 
-    // append multiple color stops by using D3's data/enter step
+    // Color stops
     linearGradient
       .selectAll("stop")
       .data([
@@ -814,15 +820,15 @@ function viewMap() {
         return d.color;
       });
 
-    //create tick marks
+    // Ticks
     xLeg = d3.scaleLinear().domain([min_c, max_c]).range([15, 288]);
 
     axisLeg = d3
       .axisBottom(xLeg)
-      .tickValues(colorScale_le_c.domain())
+      .tickValues(arr_Scale_C.domain())
       .tickFormat((d) => (d / 1000000).toFixed(1) + "M");
 
-    // append title
+    // Draw the legend and title
     svgLegend
       .append("text")
       .attr("class", "legendTitle")
@@ -831,7 +837,6 @@ function viewMap() {
       .style("text-anchor", "left")
       .text("Cases");
 
-    // draw the rectangle and fill with gradient
     svgLegend
       .append("rect")
       .attr("x", 10)
@@ -846,24 +851,24 @@ function viewMap() {
       .attr("transform", "translate(0, 45)")
       .call(axisLeg);
   } else if (type == "Cases per 1K") {
+    // If selected "Cases per 1k"
+    //low and high color
     var lowColor_c = "#f9f9f9";
     var highColor_c = "#bc2a66";
-    var arrScale_C = d3
+    var arr_Scale_C = d3
       .scaleLinear()
       .domain([min_cp, max_cp])
       .range([lowColor_c, highColor_c]);
 
     svg_g
-
       .enter()
-
       .append("path")
       .attr("class", "states")
       .attr("id", function (d) {
         return d.properties.STATE_ABBR;
       })
       .style("fill", function (d) {
-        return arrScale_C(
+        return arr_Scale_C(
           (values_c[d.properties.STATE_ABBR] /
             state_population[d.properties.STATE_ABBR]) *
             1000
@@ -871,6 +876,7 @@ function viewMap() {
       })
       .attr("d", path)
       .on("mouseover", function (d, i) {
+        // show the information when clicking
         d3.select(this)
           .append("svg:title")
           .text(function (d) {
@@ -891,37 +897,31 @@ function viewMap() {
         d3.select(this);
       })
       .on("click", function (d, i) {
+        // Change the Temporal plots when clicking
         state_detail = state_name[this.id];
         state_ABBR = this.id;
         onFormChange();
       });
 
-    var colorScale_le_c = d3
-      .scaleLinear()
-      .domain([min_cp, max_cp])
-      .range([lowColor_c, highColor_c]);
-
+    // Update the legend
     svgLegend.select("defs").remove();
     svgLegend.select("text").remove();
     svgLegend.select("rect").remove();
     svgLegend.select("g").remove();
 
-    // append a defs (for definition) element to your SVG
+    // linearGradient to defs, each has a unique id
     defs = svgLegend.append("defs");
-
-    // append a linearGradient element to the defs and give it a unique id
     linearGradient = defs
       .append("linearGradient")
       .attr("id", "linear-gradient");
 
-    // horizontal gradient
     linearGradient
       .attr("x1", "0%")
       .attr("y1", "0%")
       .attr("x2", "100%")
       .attr("y2", "0%");
 
-    // append multiple color stops by using D3's data/enter step
+    // Color stops
     linearGradient
       .selectAll("stop")
       .data([
@@ -937,12 +937,12 @@ function viewMap() {
         return d.color;
       });
 
-    //create tick marks
+    // Ticks
     xLeg = d3.scaleLinear().domain([min_cp, max_cp]).range([10, 290]);
 
-    axisLeg = d3.axisBottom(xLeg).tickValues(colorScale_le_c.domain());
+    axisLeg = d3.axisBottom(xLeg).tickValues(arr_Scale_C.domain());
 
-    // append title
+    // Draw the legend and title
     svgLegend
       .append("text")
       .attr("class", "legendTitle")
@@ -951,7 +951,6 @@ function viewMap() {
       .style("text-anchor", "left")
       .text("Cases");
 
-    // draw the rectangle and fill with gradient
     svgLegend
       .append("rect")
       .attr("x", 10)
@@ -966,27 +965,30 @@ function viewMap() {
       .attr("transform", "translate(0, 45)")
       .call(axisLeg);
   } else if (type == "Death") {
+    // If selected "Death"
+    //low and high color
     var lowColor_D = "#f9f9f9";
     var highColor_D = "#3a0ca3";
-    var arrScale_D = d3
+    var arr_Scale_D = d3
       .scaleLinear()
       .domain([min_d, max_d])
       .range([lowColor_D, highColor_D]);
+
     svg
       .selectAll(".state")
       .data(topojson.feature(states, states.objects.usStates).features)
       .enter()
-
       .append("path")
       .attr("class", "states")
       .attr("id", function (d) {
         return d.properties.STATE_ABBR;
       })
       .style("fill", function (d) {
-        return arrScale_D(values_d[d.properties.STATE_ABBR]);
+        return arr_Scale_D(values_d[d.properties.STATE_ABBR]);
       })
       .attr("d", path)
       .on("mouseover", function (d, i) {
+        // show the information when clicking
         d3.select(this)
           .append("svg:title")
           .text(function (d) {
@@ -1007,37 +1009,30 @@ function viewMap() {
         d3.select(this);
       })
       .on("click", function (d, i) {
+        // Change the Temporal plots when clicking
         state_detail = state_name[this.id];
         onFormChange();
       });
 
-    var colorScale_le_d = d3
-      .scaleLinear()
-      .domain([min_d, max_d])
-      .range([lowColor_D, highColor_D]);
-
-    // d3.select("#legend").select("svg").remove();
+    // Update the legend
     svgLegend.select("defs").remove();
     svgLegend.select("text").remove();
     svgLegend.select("rect").remove();
     svgLegend.select("g").remove();
 
-    // append a defs (for definition) element to your SVG
+    // linearGradient to defs, each has a unique id
     defs = svgLegend.append("defs");
-
-    // append a linearGradient element to the defs and give it a unique id
     linearGradient = defs
       .append("linearGradient")
       .attr("id", "linear-gradient");
 
-    // horizontal gradient
     linearGradient
       .attr("x1", "0%")
       .attr("y1", "0%")
       .attr("x2", "100%")
       .attr("y2", "0%");
 
-    // append multiple color stops by using D3's data/enter step
+    // Color stops
     linearGradient
       .selectAll("stop")
       .data([
@@ -1053,15 +1048,15 @@ function viewMap() {
         return d.color;
       });
 
-    //create tick marks
+    // Ticks
     xLeg = d3.scaleLinear().domain([min_d, max_d]).range([10, 285]);
 
     axisLeg = d3
       .axisBottom(xLeg)
-      .tickValues(colorScale_le_d.domain())
+      .tickValues(arr_Scale_D.domain())
       .tickFormat((d) => (d / 1000).toFixed(1) + "K");
 
-    // append title
+    // Draw the legend and title
     svgLegend
       .append("text")
       .attr("class", "legendTitle")
@@ -1070,7 +1065,6 @@ function viewMap() {
       .style("text-anchor", "left")
       .text("Death");
 
-    // draw the rectangle and fill with gradient
     svgLegend
       .append("rect")
       .attr("x", 10)
@@ -1085,24 +1079,26 @@ function viewMap() {
       .attr("transform", "translate(0, 45)")
       .call(axisLeg);
   } else if (type == "Death per 1K") {
+    // If selected "Death per 1K"
+    //low and high color
     var lowColor_D = "#f9f9f9";
     var highColor_D = "#3a0ca3";
-    var arrScale_D = d3
+    var arr_Scale_D = d3
       .scaleLinear()
       .domain([min_dp, max_dp])
       .range([lowColor_D, highColor_D]);
+
     svg
       .selectAll(".state")
       .data(topojson.feature(states, states.objects.usStates).features)
       .enter()
-
       .append("path")
       .attr("class", "states")
       .attr("id", function (d) {
         return d.properties.STATE_ABBR;
       })
       .style("fill", function (d) {
-        return arrScale_D(
+        return arr_Scale_D(
           (values_d[d.properties.STATE_ABBR] /
             state_population[d.properties.STATE_ABBR]) *
             1000
@@ -1110,6 +1106,7 @@ function viewMap() {
       })
       .attr("d", path)
       .on("mouseover", function (d, i) {
+        // show the information when clicking
         d3.select(this)
           .append("svg:title")
           .text(function (d) {
@@ -1130,36 +1127,30 @@ function viewMap() {
         d3.select(this);
       })
       .on("click", function (d, i) {
+        // Change the Temporal plots when clicking
         state_detail = state_name[this.id];
         onFormChange();
       });
 
-    var colorScale_le_d = d3
-      .scaleLinear()
-      .domain([min_dp, max_dp])
-      .range([lowColor_D, highColor_D]);
-
+    // Update the legend
     svgLegend.select("defs").remove();
     svgLegend.select("text").remove();
     svgLegend.select("rect").remove();
     svgLegend.select("g").remove();
 
-    // append a defs (for definition) element to your SVG
+    // linearGradient to defs, each has a unique id
     defs = svgLegend.append("defs");
-
-    // append a linearGradient element to the defs and give it a unique id
     linearGradient = defs
       .append("linearGradient")
       .attr("id", "linear-gradient");
 
-    // horizontal gradient
     linearGradient
       .attr("x1", "0%")
       .attr("y1", "0%")
       .attr("x2", "100%")
       .attr("y2", "0%");
 
-    // append multiple color stops by using D3's data/enter step
+    // Color stops
     linearGradient
       .selectAll("stop")
       .data([
@@ -1175,12 +1166,12 @@ function viewMap() {
         return d.color;
       });
 
-    //create tick marks
+    // Ticks
     xLeg = d3.scaleLinear().domain([min_dp, max_dp]).range([10, 290]);
 
-    axisLeg = d3.axisBottom(xLeg).tickValues(colorScale_le_d.domain());
+    axisLeg = d3.axisBottom(xLeg).tickValues(arr_Scale_D.domain());
 
-    // append title
+    // Draw the legend and title
     svgLegend
       .append("text")
       .attr("class", "legendTitle")
@@ -1189,7 +1180,6 @@ function viewMap() {
       .style("text-anchor", "left")
       .text("Death");
 
-    // draw the rectangle and fill with gradient
     svgLegend
       .append("rect")
       .attr("x", 10)
